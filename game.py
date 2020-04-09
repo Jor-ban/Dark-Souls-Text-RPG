@@ -13,32 +13,32 @@ logo = """                                         `                            
                `+sNMMmsooshdds/./sNN/`    -mNNmo/sNNNd:   :ymmy:` -sNNNo`  `oNNNdo-`     `/mNms//smy-   .+dmho++oshds:`    /hNmhoooyhs-   ./hNNNs+//+odN/-yNds//odmo`               
                `:::::::::--.`  `--:--`    .------------     `.--` .-----`   .------.       .:////:.       `.-:///:.`         .:///:-`     .-------------`  -:///:-`               
 \n""" + ' '* 80 + 'T E X T   R P G \n\n'
-bonfire = """                                  ``-                                                               
-                                  `.:                                                               
-                                   `:                                                               
-                                    .`                                                              
-                                    `.  ``                                                          
-                                     `                                                              
-                                  `````                                                             
-                                     ` ``                                                           
-                                     `.`                                                            
-                                      ``.                                                           
-                                      ```                                                           
-                                      `-.           `                                               
-                                       .-`       ` `-`                                              
-                                       ``.        .-:. `                                            
-                                        ...    ``.::/:`.                                            
-                                        ..:  `./-:+/o/::.                                           
-                                        `::-`:+++++++++:-`                                          
-                                         :+/:+ooo+oo+o+:-`                                          
-                                         `o++ossoooooo++:.``                                        
-                                     `..`-/o+osssososso/-----                                       
-                                   ``.-:/:++++osssssso++//-..`                                      
-                                `````.-//-:/:+/o:o+o+++//:-::--```                                  
-                                ``-.`.-:/-...-.-.:/:////:/::--:----.`                               
-                                ``.`..--.--:-.--::-:/://--:--.....--.``                             
-                          ``   ``...........--....-:.--::--.-:-:-.`...``                            
-                                 ```````...-......``...--.....```        """
+bonfire = """                                                                     ``-                                                               
+                                                                    `.:                                                               
+                                                                    `:                                                               
+                                                                        .`                                                              
+                                                                        `.  ``                                                          
+                                                                        `                                                              
+                                                                    `````                                                             
+                                                                        ` ``                                                           
+                                                                        `.`                                                            
+                                                                        ``.                                                           
+                                                                        ```                                                           
+                                                                        `-.           `                                               
+                                                                        .-`       ` `-`                                              
+                                                                        ``.        .-:. `                                            
+                                                                            ...    ``.::/:`.                                            
+                                                                            ..:  `./-:+/o/::.                                           
+                                                                            `::-`:+++++++++:-`                                          
+                                                                            :+/:+ooo+oo+o+:-`                                          
+                                                                            `o++ossoooooo++:.``                                        
+                                                                        `..`-/o+osssososso/-----                                       
+                                                                    ``.-:/:++++osssssso++//-..`                                      
+                                                                    `````.-//-:/:+/o:o+o+++//:-::--```                                  
+                                                                    ``-.`.-:/-...-.-.:/:////:/::--:----.`                               
+                                                                    ``.`..--.--:-.--::-:/://--:--.....--.``                             
+                                                            ``   ``...........--....-:.--::--.-:-:-.`...``                            
+                                                                    ```````...-......``...--.....```        """
 
 # variables part
 main_menu_options = [
@@ -46,6 +46,36 @@ main_menu_options = [
     'new game',
     'creators' 
     ]
+hero = {}
+current_map = 'prison'
+location_name = ''
+# functions part
+def load_game(): ###TODO
+    if current_map and location_name:
+        pass
+    else:
+        alert("N O   G A M E S   F O U N D")
+        main_menu()
 
-clear()
-menu_choice = output(logo, main_menu_options, 'short', 'EXIT')
+def new_game():
+    location_name = ''
+    situation("you wake up in an unknown prison surrounded by cold dark walls sitting somewhere in the corner you do not need to lick terrible sounds coming from outside your room. And deadly, a dead body falls on top of your room, coming to you, you look up and you see a leaving knight. А body key is hanging on the belt, very similar to the one that locked you here")
+    chose = output(none,['take the key', 'open locked door'], 'extended', 'menu')
+
+def creator_info():
+    pass
+
+def main_menu():
+    clear()
+    menu_choice = output(logo, main_menu_options, 'short', 'EXIT')
+    if menu_choice == 1:
+        load_game()
+    elif menu_choice == 2:
+        new_game()
+    elif menu_choice == 3:
+        creator_info()
+    elif menu_choice == 0:
+        exit()
+    else:
+        alert('U N K N O W N   E R R O R')
+main_menu()  # displaying main menu 
