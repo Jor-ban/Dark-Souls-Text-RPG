@@ -41,26 +41,54 @@ bonfire = """                                                                   
                                                                     ```````...-......``...--.....```        """
 
 # variables part
+global_loot = {
+    'prison key': {
+        'name': 'prison room key',
+        'info': 'key that opens your prison room'
+    }
+}
 main_menu_options = [
     'continue',
     'new game',
     'creators' 
     ]
-hero = {}
+hero = {
+    'inventory': []
+}
 current_map = 'prison'
 location_name = ''
+
 # functions part
+def prison_room():
+    global location_name
+    location_name = 'prison room'
+    options = ['open prison room door']
+    if global_loot['prison key'] not in hero['inventory']: # if user haven't taken room key
+        options.append('take the key')
+    chose = output(None, options, 'extended', 'menu')
+    if chose == 1 and global_loot['prison key'] not in hero['inventory']:  # if he tries to open without key
+        achieve('door is locked')
+        prison_room()
+    elif chose == 1:    # if key is taken
+        achieve('door opens')
+    elif chose == 2:    # to take the key
+        achieve('you\'ve got the key')
+        hero['inventory'].append(global_loot['prison key'])
+        prison_room()
+    else:
+        main_menu()
+
 def load_game(): ###TODO
-    if current_map and location_name:
-        pass
+    if location_name:
+        locations_map[location_name]    
     else:
         alert("N O   G A M E S   F O U N D")
         main_menu()
 
 def new_game():
-    location_name = ''
+    location_name = 'prison room'
     situation("you wake up in an unknown prison surrounded by cold dark walls sitting somewhere in the corner you do not need to lick terrible sounds coming from outside your room. And deadly, a dead body falls on top of your room, coming to you, you look up and you see a leaving knight. А body key is hanging on the belt, very similar to the one that locked you here")
-    chose = output(none,['take the key', 'open locked door'], 'extended', 'menu')
+    prison_room()
 
 def creator_info():
     pass

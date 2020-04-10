@@ -28,9 +28,12 @@ def situation(text):
 
 def achieve(name):
     clear()
+    text = ''
+    for char in name:   #making spaces between characters in sentence
+        text += char + ' '
     print('\n' * 10)
-    print(' ' * 67 + '-' * 42 + '\n' + " "*58 + "~~~~~~~~!  " + " "*(19 - len(name)//2) + name.upper() + " "*(19 - len(name)//2) + "  !~~~~~~~~ \n" + ' ' * 67 + '-' * 42)
-    print(" " * 75 + "press Enter to continue")
+    print(' ' * 67 + '-' * 42 + '\n' + " "*58 + "~~~~~~~~!  " + " "*(19 - len(text)//2) + text.upper() + " "*(19 - len(text)//2) + "  !~~~~~~~~ \n" + ' ' * 67 + '-' * 42)
+    print(" " * 77 + "press Enter to continue")
     input()
     clear() # clearing the console
 
