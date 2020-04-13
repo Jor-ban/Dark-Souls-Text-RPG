@@ -41,69 +41,86 @@ bonfire = """                                                                   
                                                                     ```````...-......``...--.....```        """
 
 # variables part
-global_loot = {
-    'prison key': {
-        'name': 'prison room key',
-        'info': 'key that opens your prison room'
-    }
-}
-main_menu_options = [
-    'continue',
-    'new game',
-    'creators' 
-    ]
-hero = {
-    'inventory': []
-}
+
+hero = {}
 current_map = 'prison'
 location_name = ''
 
 # functions part
-def prison_room():
+
+def set_location(loc):
     global location_name
-    location_name = 'prison room'
+    location_name = loc
+    location_print(loc)
+
+def load_location(name):
+    clear()
+    location_print(name)
+    if name == 'prison room':
+        return prison_room()
+    elif name == 'room corridor':
+        return room_corridor()
+
+def room_corridor():
+    set_location('room corridor')
+    situation(" You see 3 undeads staying at wall and crying, they don't attack you")
+
+def prison_room():
+    set_location('prison room')
     options = ['open prison room door']
     if global_loot['prison key'] not in hero['inventory']: # if user haven't taken room key
         options.append('take the key')
     chose = output(None, options, 'extended', 'menu')
     if chose == 1 and global_loot['prison key'] not in hero['inventory']:  # if he tries to open without key
-        achieve('door is locked')
-        prison_room()
+        message('door is locked')
+        status(hero)
+        return prison_room()
     elif chose == 1:    # if key is taken
-        achieve('door opens')
+        message('door opens')
+        return room_corridor()
     elif chose == 2:    # to take the key
-        achieve('you\'ve got the key')
+        message("you've got the key")
         hero['inventory'].append(global_loot['prison key'])
-        prison_room()
+        status(hero)
+        return prison_room()
     else:
-        main_menu()
+        return main_menu()
 
-def load_game(): ###TODO
+def load_game():
     if location_name:
-        locations_map[location_name]    
+        return load_location(location_name)    
     else:
         alert("N O   G A M E S   F O U N D")
-        main_menu()
+        return main_menu()
 
 def new_game():
-    location_name = 'prison room'
-    situation("you wake up in an unknown prison surrounded by cold dark walls sitting somewhere in the corner you do not need to lick terrible sounds coming from outside your room. And deadly, a dead body falls on top of your room, coming to you, you look up and you see a leaving knight. А body key is hanging on the belt, very similar to the one that locked you here")
-    prison_room()
+    global hero
+    hero = hero_creator()
+    clear()
+    status(hero)
+    situation("You wake up in an unknown prison surrounded by cold dark walls sitting somewhere at the corner not to hear terrible sounds coming from outside your room. Suddenly, a dead body falls from top of your room where is a big hole to outside, slowly awaking you look up and you see a leaving knight. А body key is hanging on the belt, very similar to the one that locked you here")
+    return prison_room()
 
 def creator_info():
     pass
 
 def main_menu():
     clear()
+    main_menu_options = [
+        'continue',
+        'new game',
+        'credits' 
+    ]
     menu_choice = output(logo, main_menu_options, 'short', 'EXIT')
     if menu_choice == 1:
-        load_game()
+        return load_game()
     elif menu_choice == 2:
-        new_game()
+        return new_game()
     elif menu_choice == 3:
-        creator_info()
+        return creator_info()
     elif menu_choice == 0:
         exit()
     else:
         alert('U N K N O W N   E R R O R')
+        exit()
 main_menu()  # displaying main menu 
