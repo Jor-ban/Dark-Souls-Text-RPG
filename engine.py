@@ -8,7 +8,7 @@ global_loot = {
         'power': 24,
         'prot': 17,
         'distance': 0.5,
-        'info': 'convenient to use when you have no weapons and shield',
+        'info': 'convenient to use when you have no weapons',
     },
     'prison key' : {
         'name': 'prison room key',
@@ -48,6 +48,36 @@ global_loot = {
         'name': "underpants",
         'prot': 12,
         'info': "doesn't protect anything but the most important"
+    },
+    'broken sword':{
+        'class' : 'weapon',
+        'name'  : 'broken rusty sword',
+        'prot'  : 9,
+        'power' : 45,
+        'distance' : 0.65,
+        'info'  : 'broken undeads sword rusted by time'
+    },
+    'tower shield':{
+        'class' : 'weapon',
+        'name'  : 'tower shield',
+        'prot'  : 43,
+        'power' : 23,
+        'distance' : 0.5,
+        'info'  : 'black tower shield mostly used by undead soldiers'
+    },
+    'undead soldiers armor':{
+        'class' : 'armor',
+        'name'  : 'undead soldier`s armor',
+        'prot'  : 40,
+        'info'  : 'armor set taken from neutralized undead'
+    },
+    'astorian knights shield': {
+        'class' : 'weapon',
+        'name'  : 'tower shield',
+        'prot'  : 43,
+        'power' : 23,
+        'distance' : 0.5,
+        'info'  : 'black tower shield mostly used by undead soldiers'
     }
 }
 classes = [
@@ -56,7 +86,7 @@ classes = [
         'class'     : 'knight',
         'info'      : 'very powerfull',
         'start-inv' : 'knight sword and armor',
-        'init_heal' : 100,
+        'health'    : 100,
         'power'     : 100,
         'luck'      : 0.8,
         'sword'     : global_loot['balders knight sword'],
@@ -72,7 +102,7 @@ classes = [
         'class'     : 'magician',
         'info'      : 'long distance fight',
         'start-inv' : 'magic stick and dress',
-        'init_heal' : 50,
+        'health'    : 50,
         'power'     : 100,
         'luck'      : 1,
         'sword'     : global_loot['wooden magic stick'],
@@ -88,7 +118,7 @@ classes = [
         'class'     : 'poor',
         'info'      : 'ultra lucky',
         'start-inv' : 'nothing',
-        'init_heal' : 120,
+        'health'    : 120,
         'power'     : 100,
         'luck'      : 1.6,
         'sword'     : global_loot['fist'],
@@ -104,33 +134,42 @@ def hero_creator():
     clear()
     hero_obj = {}
     location_print('select your class')
-    params = ['class', 'init_heal', 'luck', 'info']
+    params = ['class', 'health', 'luck', 'info']
     length = [15, 10, 10, 35]
     table(params, length, classes)
     user_choice = input("\n" + " " * 83 + ">| ")
-    if user_choice in [str(index + 1) for index in range(len(classes))]:
-        hero_obj = classes[int(user_choice) - 1]
-        hero_obj['health'] = hero_obj['init_heal']
-        hero_obj['estus'] = None
-        location_print('enter your name')
-        hero_name = input("\n" + " " * 67 + ">| ")
-        hero_obj['name'] = hero_name
-        return hero_obj
-    else:
-        alert('W R O N G  I N P U T')
-        return hero_creator(hero_obj)
+    if user_choice not in [str(index + 1) for index in range(len(classes))]:
+        alert('wrong input')
+        return hero_creator()
 
+    hero_obj = classes[int(user_choice) - 1]
+    hero_obj['init_heal'] = hero_obj['health']
+    hero_obj['estus'] = None
+    location_print('enter your name')
+    hero_name = input("\n" + " " * 67 + ">| ")
+    if len(hero_name) > 15:
+        new_name = ''
+        for i in range(13):
+            new_name += hero_name[i]
+        hero_name = new_name + '...'
+    hero_obj['name'] = hero_name
+    return hero_obj
 
 # define console clear function 
 def clear(): 
-  
+
     # for windows 
     if name == 'nt': 
         system('cls') 
-  
+
     # for mac and linux(here, os.name is 'posix') 
     else: 
         system('clear') 
+
+def enter_to_continue():
+    print(' ' * 66 + '-' * 42 + '\n' + " " * 76 + "press Enter to continue")
+    input()
+    clear() # clearing the console
 
 def status(hero):
     health_bar = '÷ ' + '■ ' * (hero['health'] // 10) + '□ ' * ((hero['init_heal'] - hero['health']) // 10)
@@ -142,34 +181,36 @@ def status(hero):
     shield = hero['shield']
     if hero['shield'] == global_loot['fist']:
         shield = hero['sword']
-    tools = ' ⚔ ' + str(hero['sword']['power']) + ' ※  ' + str(hero['armor']['prot'] + shield['prot'])
+    tools = ' ⚔ ' + str(hero['sword']['power']) + ' ※  ' + str(hero['armor']['prot']) + ' ⛛ ' + str(shield['prot'])
     if hero['estus'] != None:
         tools += ' ✱ ' + str(hero['estus'])
-    print(' ' * 48 + '♝ ' + hero['name'] + '  ' + health_bar + ' ' * (70 - len(hero['name'] + health_bar + tools)) + tools)
+    print(' ' * 47 + '♝ ' + hero['name'] + '  ' + health_bar + ' ' * (76 - len(hero['name'] + health_bar + tools)) + tools)
 
 def situation(text):
-    print(' ' * 48 + '-' * 75 + '\n') #newline
+    print(' ' * 47 + '-' * 80 + '\n') #newline
     arr = text.split()
     stopped_index = 0
     line = ''
     for word in arr:
-        if len(line) < 73:
+        if len(line + word) <= 76:
             line += word + " "
         else:
-            print(" " * 48 + line)
+            print(" " * 45 + '|   ' + line + ' ' * (77 - len(line)) +'  |')
             line = word + " "
-    print(" "*48 + line + '\n\n' + ' ' * 48 + '-' * 75)
+    print(" "*45 + '|   ' + line + ' ' * (77 - len(line)) +'  |')
+    print('\n' + ' ' * 47 + '-' * 80)
 
-def message(name):
+def message(msg):
     clear()
     text = ''
-    for char in name:   #making spaces between characters in sentence
+    for char in msg:
         text += char + ' '
     print('\n' * 10)
-    print(' ' * 67 + '-' * 42 + '\n' + " "*58 + "~~~~~~~~!  " + " "*(19 - len(text)//2) + text.upper() + " "*(19 - len(text)//2) + "  !~~~~~~~~ ")
-    print(' ' * 67 + '-' * 42 + '\n' + " " * 77 + "press Enter to continue")
-    input()
-    clear() # clearing the console
+    print(' ' * 47 + '-' * 80 + '\n') 
+    line = " "*(38 - len(text) // 2) + text.upper() + " "*(38 - len(text) // 2 + len(text) % 2)
+    print(" "*45 + '|   ' + line + ' ' * (77 - len(line)) +'  |')
+    print('\n' + ' ' * 47 + '-' * 80)     
+    enter_to_continue()
 
 def location_print(name):
     long_name = ''
@@ -179,47 +220,15 @@ def location_print(name):
 
 def alert(message):
     clear()
+    text = ''
+    for char in message:   #making spaces between characters in sentence
+        text += char + ' '
     print('\n' * 10)
-    print(" "*58 + ">> !! >> " + "█" + " "*(19 - len(message)//2) + message + " "*(19 - len(message)//2) + "█" + " << !! << ")
+    print(" "*58 + ">> !! >> " + "█" + " "*(19 - len(text)//2) + text.upper() + " "*(19 - len(text)//2) + "█" + " << !! << ")
     print(" "*68 + "_"*39)
-    print(" " * 75 + "press Enter to continue")
-    input()
-    clear() # clearing the console
+    enter_to_continue()
 
-def output(picture, arr, style, last_option):  # output(None, ['hello', 'its me'], 'extended', 'back')
-    # text pictire part
-    if picture:
-        print(picture)
-    # outputing options
-    chose = ''
-    if style == 'small' or style == 'short':  # small space with capital letters (main menu mostly)
-        print(" "*67 + "_"*40)
-        for index in range(len(arr)):
-            chose = arr[index].upper()
-            print()
-            print(" "*58 + f"<| {index + 1} |> " + "◆" + " "*(20 - len(chose)//2) + chose + " "*(20 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
-            print(" "*67 + "_"*40)
-    else:
-        print(" "*47 + "_"*80)
-        for index in range(len(arr)): # for long space
-            chose = arr[index]
-            print()
-            print(" "*38 + f"<| {index + 1} |> " + "◆" + " "*(40 - len(chose)//2) + chose + " "*(40 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
-            print(" "*47 + "_"*80)
-    # 0 for back or exit
-    print("\n\n" + " "*58 + "<| 0 |> " + "◆" + " "*(20 - len(last_option)//2) + last_option + " "*(20 - len(last_option)//2) + "◆" + " <| 0 |> ")
-    print(" "*67 + "_"*40)
-    # input part
-    user_choice = input("\n" + " " * 84 + ">| ")
-    temp_list = [f'{i + 1}' for i in range(len(arr))]
-    if user_choice in temp_list or user_choice == '0': # if this choose exists in list
-        return int(user_choice)
-    else:
-        alert('W R O N G  I N P U T')
-        return output(picture, arr, style, last_option)
-
-def table(params, percentage, arr):  
-    # ['name', 'info'], [25, 40], [{'name': 'prison room key', 'info': 'opens your prison room'}]
+def table(params, percentage, arr):  # ['name', 'info'], [25, 40], [{'name': 'prison room key', 'info': 'opens your prison room'}]
     line = ''
     left_space_amount = 62
     underline = "_"
@@ -239,5 +248,3 @@ def table(params, percentage, arr):
             space = round(75 * percentage[i]/100)
             line += str(obj[param]) + " " * (space - len(str(obj[param]))) + " | "
         print(line + f"<| { index + 1 } |>" +"\n" + underline + "\n")
-
-

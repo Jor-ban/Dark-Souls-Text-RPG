@@ -41,42 +41,80 @@ bonfire = """                                                                   
                                                                     ```````...-......``...--.....```        """
 
 # variables part
-
-hero = {}
+hero = {
+    'name'      : 'Jordan',
+    'class'     : 'knight',
+    'info'      : 'very powerfull',
+    'start-inv' : 'knight sword and armor',
+    'health'    : 100,
+    #
+    'init_heal' : 100,
+    'estus'     : None,
+    #
+    'power'     : 100,
+    'luck'      : 0.8,
+    'sword'     : global_loot['balders knight sword'],
+    'armor'     : global_loot['balders knight armor'],
+    'shield'    : global_loot['fist'],
+    'inventory' : [
+        global_loot['underpants'],
+        global_loot['balders knight sword'],
+        global_loot['balders knight armor'],
+    ],  
+}
+alive_enemies = None
+enemies = ['room corridor', ]
 current_map = 'prison'
-location_name = ''
+curr_location = None
+prev_location = None
 
-# functions part
-
-def set_location(loc):
-    global location_name
-    location_name = loc
-    location_print(loc)
-
-def load_location(name):
-    clear()
-    location_print(name)
-    if name == 'prison room':
-        return prison_room()
-    elif name == 'room corridor':
-        return room_corridor()
+#locations functions
 
 def room_corridor():
     set_location('room corridor')
-    situation(" You see 3 undeads staying at wall and crying, they don't attack you")
+    status(hero)
+    if curr_location in alive_enemies:
+        situation(" You see 3 undeads staying at wall, they don't attack you")
+        options = [
+            'Pass them silently',
+            'Get back to prison room',
+            'Attack them',
+        ]
+    else:
+        options = [
+            'Leave corridor',
+            'Go to prison room'
+        ]
+    user_choice = output(None, options, 'extended', 'main menu')
+    if user_choice == 1:
+        pass
+    elif user_choice == 2:
+        pass
+    elif user_choice == 3 and curr_location in alive_enemies:
+        clear()
+        return prison_room()
+    else:
+        alert('unknown error')
+        return main_menu()
 
 def prison_room():
     set_location('prison room')
-    options = ['open prison room door']
+    options = ['Go to corridor']
+    if not prev_location:
+        options = ['Open prison room door']
+
     if global_loot['prison key'] not in hero['inventory']: # if user haven't taken room key
-        options.append('take the key')
-    chose = output(None, options, 'extended', 'menu')
+        options.append('Take the key')
+
+    chose = output(None, options, 'extended', 'main menu')
     if chose == 1 and global_loot['prison key'] not in hero['inventory']:  # if he tries to open without key
         message('door is locked')
         status(hero)
         return prison_room()
     elif chose == 1:    # if key is taken
-        message('door opens')
+        if not prev_location:
+            message('door opens')
+        clear()
         return room_corridor()
     elif chose == 2:    # to take the key
         message("you've got the key")
@@ -84,11 +122,64 @@ def prison_room():
         status(hero)
         return prison_room()
     else:
+        alert("unknown error")
         return main_menu()
 
+# functions part
+
+def output(picture, arr, style, last_option):  # output(None, ['hello', 'its me'], 'small', 'back')
+    # text pictire part
+    if picture:
+        print(picture)
+    # outputing options
+    chose = ''
+    if style == 'small' or style == 'short':  # small space with capital letters (main menu mostly)
+        print(" "*67 + "_"*40)
+        for index in range(len(arr)):
+            chose = arr[index].upper()
+            print()
+            print(" "*58 + f"<| {index + 1} |> " + "◆" + " "*(20 - len(chose)//2) + chose + " "*(20 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
+            print(" "*67 + "_"*40)
+    else:
+        print(" "*47 + "_"*80)
+        for index in range(len(arr)): # for long space
+            chose = arr[index]
+            print()
+            print(" "*38 + f"<| {index + 1} |> " + "◆" + " "*(40 - len(chose)//2) + chose + " "*(40 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
+            print(" "*47 + "_"*80)
+    # 0 for back or exit
+    print("\n\n" + " "*58 + "<| 0 |> " + "◆" + " "*(20 - len(last_option)//2) + last_option + " "*(20 - len(last_option)//2) + "◆" + " <| 0 |> ")
+    print(" "*67 + "_"*40)
+    # input part
+    user_choice = input("\n" + " " * 84 + ">| ")
+    temp_list = [str(i + 1) for i in range(len(arr))]
+
+    if last_option == 'main menu' and user_choice == '0':
+        return main_menu()
+    elif user_choice in temp_list or user_choice == '0': # if this choose exists in list
+        return int(user_choice)
+    else:
+        alert('wrong input')
+        status(hero)
+        return output(picture, arr, style, last_option)
+
+def set_location(loc):
+    global curr_location, prev_location
+    if loc != curr_location:
+        prev_location = curr_location
+        curr_location = loc
+        location_print(loc)        
+
+def load_location(name):
+    clear()
+    if name == 'prison room':
+        return prison_room()
+    elif name == 'room corridor':
+        return room_corridor()
+
 def load_game():
-    if location_name:
-        return load_location(location_name)    
+    if curr_location:
+        return load_location(curr_location)    
     else:
         alert("N O   G A M E S   F O U N D")
         return main_menu()
@@ -98,7 +189,8 @@ def new_game():
     hero = hero_creator()
     clear()
     status(hero)
-    situation("You wake up in an unknown prison surrounded by cold dark walls sitting somewhere at the corner not to hear terrible sounds coming from outside your room. Suddenly, a dead body falls from top of your room where is a big hole to outside, slowly awaking you look up and you see a leaving knight. А body key is hanging on the belt, very similar to the one that locked you here")
+    situation("You wake up in an unknown prison surrounded by cold dark walls sitting somewhere at the corner not to hear terrible sounds coming from outside your room. Suddenly, a dead body falls from top of your room where is a big hole to outside, slowly awaking you look up and you see a leaving knight. А body has a key hanging on the belt, very similar to the one that locked you here")
+    alive_enemies = enemies
     return prison_room()
 
 def creator_info():
@@ -121,6 +213,6 @@ def main_menu():
     elif menu_choice == 0:
         exit()
     else:
-        alert('U N K N O W N   E R R O R')
+        alert('unknown error')
         exit()
 main_menu()  # displaying main menu 
