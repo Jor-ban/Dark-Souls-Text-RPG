@@ -85,7 +85,7 @@ def room_corridor():
             'Leave corridor',
             'Go to prison room'
         ]
-    user_choice = output(None, options, 'extended', 'main menu')
+    user_choice = output(options)
     if user_choice == 1:
         pass
     elif user_choice == 2:
@@ -106,7 +106,7 @@ def prison_room():
     if global_loot['prison key'] not in hero['inventory']: # if user haven't taken room key
         options.append('Take the key')
 
-    chose = output(None, options, 'extended', 'main menu')
+    chose = output(options)
     if chose == 1 and global_loot['prison key'] not in hero['inventory']:  # if he tries to open without key
         message('door is locked')
         status(hero)
@@ -127,41 +127,29 @@ def prison_room():
 
 # functions part
 
-def output(picture, arr, style, last_option):  # output(None, ['hello', 'its me'], 'small', 'back')
-    # text pictire part
-    if picture:
-        print(picture)
-    # outputing options
-    chose = ''
-    if style == 'small' or style == 'short':  # small space with capital letters (main menu mostly)
-        print(" "*67 + "_"*40)
-        for index in range(len(arr)):
-            chose = arr[index].upper()
-            print()
-            print(" "*58 + f"<| {index + 1} |> " + "◆" + " "*(20 - len(chose)//2) + chose + " "*(20 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
-            print(" "*67 + "_"*40)
-    else:
+def output(arr):  # output(['hello', 'its me'])
+
+    print(" "*47 + "_"*80)
+    for index in range(len(arr)): # for long space
+        option = arr[index]
+        print()
+        print(" "*38 + f"<| {index + 1} |> " + "◆" + " "*(40 - len(option)//2) + option + " "*(40 - len(option)//2 - len(option) % 2) + "◆" + f" <| {index + 1} |> ")
         print(" "*47 + "_"*80)
-        for index in range(len(arr)): # for long space
-            chose = arr[index]
-            print()
-            print(" "*38 + f"<| {index + 1} |> " + "◆" + " "*(40 - len(chose)//2) + chose + " "*(40 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
-            print(" "*47 + "_"*80)
     # 0 for back or exit
-    print("\n\n" + " "*58 + "<| 0 |> " + "◆" + " "*(20 - len(last_option)//2) + last_option + " "*(20 - len(last_option)//2) + "◆" + " <| 0 |> ")
+    print("\n\n" + " "*58 + "<| 0 |> " + "◆" + " "*(20 - len('main menu')//2) + 'main menu' + " "*(20 - len('main menu')//2) + "◆" + " <| 0 |> ")
     print(" "*67 + "_"*40)
     # input part
     user_choice = input("\n" + " " * 84 + ">| ")
     temp_list = [str(i + 1) for i in range(len(arr))]
 
-    if last_option == 'main menu' and user_choice == '0':
+    if user_choice == '0':
         return main_menu()
     elif user_choice in temp_list or user_choice == '0': # if this choose exists in list
         return int(user_choice)
     else:
         alert('wrong input')
         status(hero)
-        return output(picture, arr, style, last_option)
+        return output(arr)
 
 def set_location(loc):
     global curr_location, prev_location
@@ -181,7 +169,7 @@ def load_game():
     if curr_location:
         return load_location(curr_location)    
     else:
-        alert("N O   G A M E S   F O U N D")
+        alert("no games found")
         return main_menu()
 
 def new_game():
@@ -203,14 +191,33 @@ def main_menu():
         'new game',
         'credits' 
     ]
-    menu_choice = output(logo, main_menu_options, 'short', 'EXIT')
-    if menu_choice == 1:
+    print(logo)
+    print(" "*67 + "_"*40)
+    for index in range(len(main_menu_options)):
+        chose = main_menu_options[index].upper()
+        print()
+        print(" "*58 + f"<| {index + 1} |> " + "◆" + " "*(20 - len(chose)//2) + chose + " "*(20 - len(chose)//2 - len(chose) % 2) + "◆" + f" <| {index + 1} |> ")
+        print(" "*67 + "_"*40)
+    
+    print("\n\n" + " "*58 + "<| 0 |> " + "◆" + " "*(20 - len('main menu')//2) + 'main menu' + " "*(20 - len('main menu')//2) + "◆" + " <| 0 |> ")
+    print(" "*67 + "_"*40)
+    # input part
+    user_choice = input("\n" + " " * 84 + ">| ")
+    temp_list = [str(i + 1) for i in range(len(main_menu_options))]
+
+    if user_choice not in temp_list:
+        alert('wrong input')
+        return main_menu()
+    
+    user_choice = int(user_choice)
+
+    if user_choice == 1:
         return load_game()
-    elif menu_choice == 2:
+    elif user_choice == 2:
         return new_game()
-    elif menu_choice == 3:
+    elif user_choice == 3:
         return creator_info()
-    elif menu_choice == 0:
+    elif user_choice == 0:
         exit()
     else:
         alert('unknown error')

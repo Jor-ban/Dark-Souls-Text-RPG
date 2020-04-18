@@ -181,7 +181,7 @@ def status(hero):
     shield = hero['shield']
     if hero['shield'] == global_loot['fist']:
         shield = hero['sword']
-    tools = ' ⚔ ' + str(hero['sword']['power']) + ' ※  ' + str(hero['armor']['prot']) + ' ⛛ ' + str(shield['prot'])
+    tools = ' ⚔ ' + str(hero['sword']['power']) + ' ※ ' + str(hero['armor']['prot']) + ' 𝌆 ' + str(shield['prot'])
     if hero['estus'] != None:
         tools += ' ✱ ' + str(hero['estus'])
     print(' ' * 47 + '♝ ' + hero['name'] + '  ' + health_bar + ' ' * (76 - len(hero['name'] + health_bar + tools)) + tools)
@@ -189,7 +189,6 @@ def status(hero):
 def situation(text):
     print(' ' * 47 + '-' * 80 + '\n') #newline
     arr = text.split()
-    stopped_index = 0
     line = ''
     for word in arr:
         if len(line + word) <= 76:
