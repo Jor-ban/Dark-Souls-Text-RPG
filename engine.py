@@ -130,6 +130,16 @@ classes = [
     }
 ]
 
+def drop(hero, *items):
+    for item in items:
+        name = item['name']
+        obj = global_loot[name]
+        possibility = item['poss']
+        luck = hero['luck']
+        if randint(0,100) * luck >= possibility:
+            hero['inventory'].append(obj)
+            message('you`ve got ' + name + '!')
+
 def hero_creator():
     clear()
     hero_obj = {}
@@ -171,7 +181,8 @@ def enter_to_continue():
     input()
     clear() # clearing the console
 
-def status(hero):
+def show_status(hero):
+    # one line display of hero status
     health_bar = '÷ ' + '■ ' * (hero['health'] // 10) + '□ ' * ((hero['init_heal'] - hero['health']) // 10)
     if hero['health'] % 10 >= 5:
         health_bar = '■ ' + health_bar
@@ -247,3 +258,5 @@ def table(params, percentage, arr):  # ['name', 'info'], [25, 40], [{'name': 'pr
             space = round(75 * percentage[i]/100)
             line += str(obj[param]) + " " * (space - len(str(obj[param]))) + " | "
         print(line + f"<| { index + 1 } |>" +"\n" + underline + "\n")
+
+drop('hello', 'world')
