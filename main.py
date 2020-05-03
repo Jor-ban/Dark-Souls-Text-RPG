@@ -2,6 +2,14 @@ from engine import *
 from pics import *
 
 #locations functions
+def death():
+    global curr_location, hero, last_fire
+    clear()
+    print('\n' * 7)
+    print(you_died)
+    enter_to_continue()
+    curr_location = last_fire
+    return load_location()
 
 def set_location(loc):
     global curr_location, prev_location
@@ -22,16 +30,21 @@ def load_location():
         return central_arena()
     elif curr_location == 'side corridor':
         return side_corridor()
+    elif curr_location == 'second floor':
+        return second_floor()
+    elif curr_location == 'third floor':
+        return third_floor()
     else:
         alert("no games found")
 
 def take_rest():
-    global alive_enemies, alive_enemies
+    global alive_enemies, enemies, curr_location, last_fire
     alive_enemies = [el for el in enemies.keys()]
+    curr_location = last_fire
     enemy_rebirth()
-    return load_location()
 
 def drink_estus():
+    global hero
     if not hero['estus']:
         message('You have no estus left')
         return 0
@@ -41,9 +54,11 @@ def drink_estus():
     else:
         hero['health'] = init
 
-def undead_archer_fight(location):
-    global enemies, hero
-    archer = enemies['corridor archer']
+    hero['estus'] -= 1
+
+def undead_archer_fight(location, next_location):
+    global enemies, hero, curr_location
+    archer = enemies[location]
     text = ''
     while archer['health'] > 0:
         if hero['health'] <= 0:
@@ -57,12 +72,12 @@ def undead_archer_fight(location):
         options = [
             'Rush the enemy',
             'Try to dodge',
-            'Back to fire',
-            'Escape to second floor',
+            'Get back',
+            'Escape',
             'Open inventory'
         ]
 
-        if global_loot['astorian knights shield'] not in hero['inventory']:
+        if global_loot['astorian knights shield'] not in hero['inventory'] and curr_location == 'side corridor':
             # if hero haven't taken shield
             options.append('Look to side prison-room')
         if hero['estus']:
@@ -75,9 +90,10 @@ def undead_archer_fight(location):
         elif chs == 2:
             text = move(archer, 20, 'dodge')
         elif chs == 3:
-            return side_corridor()
+            return load_location()
         elif chs == 4:
-            alert('TODO')
+            curr_location = next_location
+            return load_location()
         elif chs == 5:
             alert('TODO')
         elif chs == 6 and global_loot['astorian knights shield'] not in hero['inventory']:
@@ -91,9 +107,60 @@ def undead_archer_fight(location):
         {'name': 'undead soldiers armor', 'poss': 20}, 
         #{'name': 'tower shield', 'poss': 12}
     )
+    archer['health'] = archer['init_heal']
     message('You have eliminated enemy')
-    return
-        
+
+def undead_swordsman_fight(location, next_location):
+    global enemies, hero, curr_location
+    swordsman = enemies[location]
+    text = ''
+    while swordsman['health'] > 0:
+        if hero['health'] <= 0:
+            return death()
+        clear()
+        show_status()
+        enemy_stat(swordsman)
+
+        if text:
+            situation(text)
+        options = [
+            'Rush the enemy',
+            'Try to dodge',
+            'Get back',
+            'Escape',
+            'Open inventory'
+        ]
+
+        if hero['estus']:
+            #if hero returned after taking estus
+            options.append('Drink estus')
+
+        chs = output(options)
+        if chs == 1:
+            text = move(swordsman, 15, 'attack')
+        elif chs == 2:
+            text = move(swordsman, 20, 'dodge')
+        elif chs == 3:
+            return load_location()
+        elif chs == 4:
+            curr_location = next_location
+            return load_location()
+        elif chs == 5:
+            alert('TODO')
+        elif chs == 6 and hero['estus']:
+            drink_estus()
+        else:
+            alert('wrong input')
+            return undead_swordsman_fight()
+
+    alive_enemies.remove(location)
+    hero = drop(
+        {'name': 'broken sword', 'poss': 15}, 
+        {'name': 'undead soldiers armor', 'poss': 20}, 
+        {'name': 'tower shield', 'poss': 12}
+    )
+    swordsman['health'] = swordsman['init_heal']
+    message('You have eliminated enemy')   
 
 def asydemon_fight():
     global enemies
@@ -138,7 +205,84 @@ def asydemon_fight():
     alive_enemies.remove('asylum demon')
     return central_arena()
 
+def third_floor():
+    pass
 
+def second_floor():
+    global curr_location, hero
+    text = ''
+    while True:
+        clear()
+        show_status()
+        set_location('second floor')
+        if text:
+            situation(text)
+        options = [
+            'Go upper',
+            'Go down by stairs',
+            'Back to side fire',
+        ]
+        if curr_location in opened_doors:
+            options.append('Look through giant hole')
+        if hero['estus']:
+            options.append('Drink estus')
+        chs = output(options)
+        if chs == 1:
+            if curr_location not in opened_doors:
+                clear()
+                show_status()
+                situation('You hear strange voices coming upper')
+                options = [
+                    'Rush',
+                    'Get back',
+                    'Jump to side',
+                ]
+                chs = output(options)
+                if chs == 1 or chs == 2:
+                    text = "That was a giant steel ball, You couldn't dodge it but it has left a big hole on wall"
+                    hero['health'] -= 50
+                else:
+                    text = "That was a giant steel ball, You could dodge it and it has left a big hole on wall"
+                opened_doors.append(curr_location)
+            else:
+                if 'steel ball undead' in alive_enemies:
+                    return undead_swordsman_fight(curr_location, 'third floor')
+                else:
+                    return third_floor()
+        elif chs == 2:
+            if 'central fire' not in opened_doors:
+                message('You have opened door to central fire')
+                opened_doors.append('central fire')
+            return central_fire()
+        elif chs == 3:
+            if 'corridor archer' in alive_enemies:
+                undead_archer_fight('corridor archer', 'second floor')
+                return side_corridor()
+            else:
+                return side_corridor()
+        elif curr_location in opened_doors and chs == 4 and not hero['estus']:
+            clear()
+            show_status()
+            situation("You see a wounded knight")
+            options = [
+                "Attack him",
+                'Talk to knight',
+                'Leave',
+            ]
+            chs = output(options)
+            if chs == 1:
+                hero['estus'] = 2
+                text = 'You have killed the knight and got estus, estus restores your health'
+            elif chs == 2:
+                hero['estus'] = 2
+                text = ' - I am an astorian knight im damaged so I cant move, take this estus, estus restores your health'
+            elif chs == 3:
+                continue
+        elif curr_location in opened_doors and chs == 4:
+            text = 'The knight lies wounding on ground'
+        elif chs == 5:
+            drink_estus()
+                
 def side_corridor():
     clear()
     show_status()
@@ -152,18 +296,19 @@ def side_corridor():
     ]
     chs = output(options)
     if chs == 1:
-        return take_rest()
+        take_rest()
+        return side_corridor()
     elif chs == 2:
         if 'corridor archer' in alive_enemies:
-            return undead_archer_fight('corridor archer')
+            undead_archer_fight('corridor archer', 'second floor')
+            return second_floor()
         else:
-            alert('TODO')
+            return second_floor()
     elif chs == 3:
         return central_arena()
     elif chs == 4:
         alert('TODO')
     
-
 def central_arena():
     clear()
     set_location('central arena')
@@ -200,13 +345,14 @@ def central_fire():
     ]
     user_chose = output(options)
     if user_chose == 1:
-        return take_rest()
-    elif user_chose == 2 and curr_location in opened_doors:
-        print('TODO')
-        central_fire()
-    elif user_chose == 2:
-        message('door cant be opened from this side')
+        take_rest()
         return central_fire()
+    elif user_chose == 2:
+        if curr_location in opened_doors:
+            return second_floor()
+        else:
+            message('door cant be opened from this side')
+            return central_fire()
     elif user_chose == 3:
         central_arena()
     elif user_chose == 4:

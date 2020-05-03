@@ -1,6 +1,6 @@
 from os import system, name 
 from random import randint
-from pics import you_died, victory
+from pics import victory
 
 global_loot = {
     #all possible inventory objects dict
@@ -169,6 +169,11 @@ enemies = {
         'name': 'corridor archer',
         'health': 30,
         'init_heal' : 30,
+    },
+    'steel ball undead': {
+        'name': 'corridor archer',
+        'health': 50,
+        'init_heal' : 50,
     }
 }
 opened_doors = []
@@ -193,12 +198,6 @@ def enemy_rebirth():
     line = 'ENEMIES RESURRECT AFTER TAKING REST'
     print(' ' * (87 - len(line) // 2) + line )
     print('__' * 87 + '\n')
-    enter_to_continue()
-
-def death():
-    clear()
-    print('\n' * 7)
-    print(you_died)
     enter_to_continue()
 
 def enemy_stat(enemy):
@@ -277,7 +276,6 @@ def move(enemy, poss, type):
             num = int(num)
             hero['health'] -= num
             return f"You couldn't successfully dodge, you are taking {num} amounts of dammage"
-
 
 def hero_creator():
     global hero
