@@ -334,6 +334,7 @@ def drop(*items):
             message('you`ve got ' + name + '!')
     return hero
 
+
 def move(enemy, poss, type):
     """enemy_obj, possibility, type(attack or dodge).
 
